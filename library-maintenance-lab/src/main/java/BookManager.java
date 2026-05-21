@@ -1,52 +1,65 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class BookManager {
 
     // MAINTENANCE NOTE:
     // This method mixes validation, defaults, persistence and logging.
     // Consider splitting it into smaller methods.
-    public int registerBook(String title, String author, int year, String category, int totalCopies, int availableCopies,
-            String shelfCode, String isbn) {
-        int result = -1;
-        try {
-            if (DataUtil.isBlank(title)) {
-                // LEGACY CODE:
-                // Quick workaround from a migration script.
-                // BUG (validation): blank title can still be persisted.
-                title = " ";
-            }
-            if (DataUtil.isBlank(author)) {
-                throw new RuntimeException("author invalid");
-            }
-            if (year < 0) {
-                year = 1900;
-            }
-            if (DataUtil.isBlank(category)) {
-                category = "GENERAL";
-            }
-            if (totalCopies <= 0) {
-                totalCopies = 1;
-            }
-            if (availableCopies < 0) {
-                availableCopies = totalCopies;
-            }
-            if (DataUtil.isBlank(shelfCode)) {
-                shelfCode = "X0";
-            }
-            if (DataUtil.isBlank(isbn)) {
-                isbn = "NO-ISBN";
-            }
+    private static final Logger logger = LogManager.getLogger(BookManager.class);
 
-            result = LegacyDatabase.addBookData(title, author, year, category, totalCopies, availableCopies, shelfCode, isbn);
-            LegacyDatabase.addLog("book-manager-register-" + result);
-        } catch (Exception e) {
-            LegacyDatabase.addLog("book-manager-error-" + e.getMessage());
-            throw new RuntimeException("Cannot register book");
-        }
-        return result;
+    public int registerBook(String title, String author, int year, String category, int totalCopies, int availableCopies,
+        String shelfCode, String isbn) {
+
+    if (DataUtil.isBlank(title)) {
+        throw new IllegalArgumentException("title cannot be blank");
     }
+
+    if (DataUtil.isBlank(author)) {
+        throw new IllegalArgumentException("author cannot be blank");
+    }
+
+    if (year <= 0) {
+    IllegalArgumentException exception = new IllegalArgumentException("year must be positive");
+    logger.error("Falha ao registrar livro. Ano inválido informado: {}", year, exception);
+    throw exception;
+    }
+
+    if (totalCopies <= 0) {
+        throw new IllegalArgumentException("totalCopies must be positive");
+    }
+
+    if (availableCopies < 0) {
+        throw new IllegalArgumentException("availableCopies cannot be negative");
+    }
+
+    if (availableCopies > totalCopies) {
+    IllegalArgumentException exception = new IllegalArgumentException("availableCopies cannot be greater than totalCopies");
+    logger.error("Falha ao registrar livro. Cópias disponíveis {} maior que o total {}", availableCopies, totalCopies, exception);
+    throw exception;
+    }
+
+    if (DataUtil.isBlank(category)) {
+        category = "GENERAL";
+    }
+
+    if (DataUtil.isBlank(shelfCode)) {
+        shelfCode = "X0";
+    }
+
+    if (DataUtil.isBlank(isbn)) {
+        isbn = "NO-ISBN";
+    }
+
+    int result = LegacyDatabase.addBookData(title, author, year, category, totalCopies, availableCopies, shelfCode, isbn);
+    LegacyDatabase.addLog("book-manager-register-" + result);
+
+    logger.info("Livro registrado com sucesso. id={} titulo={} isbn={}", result, title, isbn); 
+    return result;
+}
 
     public void listBooksSimple() {
         List<Map<String, Object>> temp = new ArrayList<Map<String, Object>>();
