@@ -1,10 +1,4 @@
-# Compiled class file
-*.class
-
-# Maven build output
-target/
-
-# IDE metadata
+# --- IDE / editor ---
 .idea/
 *.iml
 .classpath
@@ -12,20 +6,21 @@ target/
 .settings/
 .vscode/
 
-# Log file
-*.log
-
-# OS files
+# --- Operating system ---
 .DS_Store
 Thumbs.db
 
-# BlueJ files
+# --- Logs and temporary files ---
+*.log
+npm-debug.log*
+yarn-error.log*
+.phpunit.result.cache
+
+# --- Java / Maven / general build outputs ---
+*.class
+target/
 *.ctxt
-
-# Mobile Tools for Java (J2ME)
 .mtj.tmp/
-
-# Package Files #
 *.jar
 *.war
 *.nar
@@ -33,7 +28,41 @@ Thumbs.db
 *.zip
 *.tar.gz
 *.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# --- Laravel / PHP project (admink) ---
+/admink/admink/vendor/
+/admink/admink/node_modules/
+/admink/admink/public/hot
+/admink/admink/public/storage
+/admink/admink/.env
+/admink/admink/.env.backup
+
+# Laravel runtime folders
+/admink/admink/storage/app/*
+!/admink/admink/storage/app/.gitignore
+/admink/admink/storage/framework/*
+!/admink/admink/storage/framework/.gitignore
+/admink/admink/storage/logs/*
+!/admink/admink/storage/logs/.gitignore
+/admink/admink/bootstrap/cache/*
+!/admink/admink/bootstrap/cache/.gitignore
+
+# Laravel generated keys and public storage artifacts
+/admink/admink/storage/*.key
+
+# Keep the example file tracked
+!/admink/admink/.env.example
+
+# --- Nested env files anywhere in the repository ---
+**/.env
+**/.env.backup
+!**/.env.example
+
+# --- Generic Node / frontend artifacts ---
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
