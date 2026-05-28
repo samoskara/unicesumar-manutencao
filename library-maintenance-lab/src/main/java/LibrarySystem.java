@@ -148,7 +148,17 @@ public class LibrarySystem {
             int maxDays = DataUtil.askInt("Max days: ", 14);
             int policyCode = DataUtil.askInt("Policy code: ", 0);
 
-            int loanId = loanManager.borrowBook(userId, bookId, borrowDate, dueDate, channel, maxDays, "main", policyCode);
+            BorrowRequest request = BorrowRequest.builder()
+                    .userId(userId)
+                    .bookId(bookId)
+                    .borrowDate(borrowDate)
+                    .dueDate(dueDate)
+                    .channel(channel)
+                    .maxDays(maxDays)
+                    .process("main")
+                    .policyCode(policyCode)
+                    .build();
+            int loanId = loanManager.borrowBook(request);
             System.out.println("Loan id " + loanId + " created.");
         } catch (Exception e) {
             System.out.println("Error borrow: " + e.getMessage());
@@ -299,8 +309,17 @@ public class LibrarySystem {
             int idBook = bookManager.registerBook("Legacy Java", "Unknown", 2010, "CS", 2, 2, "B1", "ISBN-999");
             int idUser = userManager.registerUser("Carlos", "carlos@mail.com", "3333-3333", "student", "Maringa",
                     "DOC-3", "ACTIVE");
-            int loanId = loanManager.borrowBook(idUser, idBook, DataUtil.nowDate(), DataUtil.datePlusDaysApprox(DataUtil.nowDate(), 14),
-                    "email", 14, "demo", 0);
+            BorrowRequest request = BorrowRequest.builder()
+                    .userId(idUser)
+                    .bookId(idBook)
+                    .borrowDate(DataUtil.nowDate())
+                    .dueDate(DataUtil.datePlusDaysApprox(DataUtil.nowDate(), 14))
+                    .channel("email")
+                    .maxDays(14)
+                    .process("demo")
+                    .policyCode(0)
+                    .build();
+            int loanId = loanManager.borrowBook(request);
             loanManager.returnBook(loanId, DataUtil.nowDate(), "email", 0, "demo", "handler");
         } catch (Exception e) {
             LegacyDatabase.addLog("demo-error-" + e.getMessage());

@@ -34,4 +34,25 @@ public class LoanManagerTest {
 
         assertEquals(0.0, fine, 0.0001);
     }
+
+    @Test
+    public void deveEmprestarLivroUsandoBorrowRequest() {
+        LoanManager loanManager = new LoanManager();
+        BorrowRequest request = BorrowRequest.builder()
+                .userId(1)
+                .bookId(1)
+                .borrowDate("2026-05-01")
+                .dueDate("2026-05-15")
+                .channel("email")
+                .maxDays(14)
+                .process("teste")
+                .policyCode(0)
+                .build();
+
+        int loanId = loanManager.borrowBook(request);
+
+        assertEquals(1, loanId);
+        assertEquals(1, LegacyDatabase.getLoans().size());
+        assertEquals(2, LegacyDatabase.getBookById(1).get("availableCopies"));
+    }
 }
