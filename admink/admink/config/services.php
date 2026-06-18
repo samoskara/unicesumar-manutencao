@@ -30,4 +30,15 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'google_calendar' => [
+        'enabled' => env('GOOGLE_CALENDAR_ENABLED', false),
+        'calendar_id' => env('GOOGLE_CALENDAR_ID', 'primary'),
+        'timezone' => env('GOOGLE_CALENDAR_TIMEZONE', 'America/Sao_Paulo'),
+        'access_token' => env('GOOGLE_CALENDAR_ACCESS_TOKEN'),
+        'client_id' => env('GOOGLE_CALENDAR_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CALENDAR_CLIENT_SECRET'),
+        'refresh_token' => env('GOOGLE_CALENDAR_REFRESH_TOKEN'),
+        'timeout' => env('GOOGLE_CALENDAR_TIMEOUT', 10),
+    ],
+
 ];

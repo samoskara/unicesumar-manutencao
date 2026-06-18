@@ -12,6 +12,10 @@ Route::group(['middleware' => 'auth', 'middleware' => 'check.estudio'], function
         
         Route::get('/home/estudio/{id_estudio}', 'HomeController@estudio')->name('home.estudio');
 
+        Route::get('/agendamento', function () {
+            return redirect()->route('admin.agendamentos.index');
+        });
+
         Route::resource('/clientes', 'ClienteController');
         
         Route::resource('/artistas', 'ArtistaController');

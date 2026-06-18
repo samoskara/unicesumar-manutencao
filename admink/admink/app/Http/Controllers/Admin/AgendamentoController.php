@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\GoogleCalendarService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use App\Http\Requests\AgendamentoRequest;
@@ -15,6 +16,12 @@ class AgendamentoController extends Controller
 {
     public function index()
     {
+        if (config('auth.local_login.enabled') && session()->get('local_authenticated')) {
+            $agendamentos = collect();
+
+            return view('admin.agendamentos.index', compact('agendamentos'));
+        }
+
         $estudio = \App\Estudio::find(session()->get('estudio'));
 
         $estacoes = $estudio->estacao;
@@ -36,6 +43,31 @@ class AgendamentoController extends Controller
 
     public function create()
     {
+        if (config('auth.local_login.enabled') && session()->get('local_authenticated')) {
+            $o_selected = request()->get('o_selected', '0');
+            $orcamentos = collect([
+                (object) [
+                    'id_orcamento' => 1,
+                    'tatuagem_nome' => 'Tatuagem demo',
+                    'tempo_estimado' => '02:00',
+                    'cliente' => (object) [
+                        'nome' => 'Cliente Local',
+                    ],
+                    'artista' => (object) [
+                        'apelido' => 'Artista Local',
+                    ],
+                ],
+            ]);
+            $estacoes = collect([
+                (object) [
+                    'id_estacao' => 1,
+                    'identificacao' => 'Estacao Local',
+                ],
+            ]);
+
+            return view('admin.agendamentos.create', compact('orcamentos', 'estacoes', 'o_selected'));
+        }
+
         $estudio = \App\Estudio::find(session()->get('estudio'));
 
         $o_selected = $_GET['o_selected'];
@@ -47,13 +79,25 @@ class AgendamentoController extends Controller
         return view('admin.agendamentos.create', compact('orcamentos', 'estacoes', 'o_selected'));
     }
 
-    public function store(AgendamentoRequest $request)
+    public function store(AgendamentoRequest $request, GoogleCalendarService $googleCalendarService)
     {
         $data = $request->all();
 
         $data['data_horario_inicio'] = new \DateTime($data['data_horario_inicio']);
 
         $data['data_horario_fim'] = new \DateTime($data['data_horario_fim']);
+
+        if (config('auth.local_login.enabled') && session()->get('local_authenticated')) {
+            $agendamento = new \App\Agendamento($data);
+            $agendamento->id_agendamento = 1;
+            $agendamento->setRelation('orcamento', new \App\Orcamento([
+                'tatuagem_nome' => 'Tatuagem demo',
+            ]));
+
+            $googleCalendarService->sync($agendamento);
+
+            return redirect()->route('admin.agendamentos.index')->with("success_toastr", "O agendamento local foi simulado com sucesso!");
+        }
 
         $agendamento = new \App\Agendamento($data);
 
@@ -81,6 +125,9 @@ class AgendamentoController extends Controller
         $orcamento->orcamento_status()->associate('3');
 
         $orcamento->save();
+
+        $agendamento->setRelation('orcamento', $orcamento);
+        $googleCalendarService->sync($agendamento);
 
         return redirect()->route('admin.agendamentos.index')->with("success_toastr", "O agendamento foi cadastrado com sucesso!");
     }
